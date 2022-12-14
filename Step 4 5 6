@@ -1,0 +1,20 @@
+#STEP 4 - COMBINE THE FASTA FILES
+cat *_Seq >> All_TE_Seq_07.12.2022
+
+#STEP 5 - RUN TRANSDECODER
+#!/bin/bash
+TransDecoder.LongOrfs -m 450 -t /home/irh25/katherine/004Genomes/003Athaliana_TE_Seq/All_TE_Seq_07.12.2022
+TransDecoder.Predict -t /home/irh25/katherine/004Genomes/003Athaliana_TE_Seq/All_TE_Seq_07.12.2022
+
+#STEP 6
+## get the hmms for transposase
+wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam//releases/Pfam28.0/Pfam-A.hmm.gz
+gunzip Pfam-A.hmm.gz
+grep -f GenProp1044_transposon_components.acc.txt Pfam-A.hmm | awk '{print $2}' > GenProp1044_transposon_components.acc.Pfam-A.txt
+hmmfetch -f Pfam-A.hmm GenProp1044_transposon_components.acc.Pfam-A.txt > GenProp1044_transposon_components.hmm
+rm Pfam-A.hmls
+
+#then need to use pFAM -- and then need to identify the integrase proteins
+module load hmmer
+hmmpress Pfam-A.hmm
+hmmscan -o WholeTransdecoder_081222.stdout --tblout WholeTransdecoder_081222.stdout Pfam-A.hmm /home/irh25/katherine/004Genomes/003Athaliana_TE_Seq/All_TE_Seq_07.12.2022.transdecoder.pep
