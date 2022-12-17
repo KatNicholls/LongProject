@@ -2,6 +2,10 @@
 
 #Method 1 - vcMSA
 
+#Download HuggingFace First
+
+#Line of vcMSA code
+vcmsa -i Int_some_17122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSAattempt_17122022 -m prot_t5_xl_uniref50
 
 
 
