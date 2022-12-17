@@ -7,9 +7,20 @@
 #Line of vcMSA code
 vcmsa -i Int_some_17122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSAattempt_17122022 -m prot_t5_xl_uniref50
 
+Save in RunvcMSA.sh
+
+#!/bin/bash -login
+source activate jacob_env
+
+out=/home/irh25/katherine/004Genomes/003Athaliana_TE_Seq
+cd $out
+
+vcmsa -i Integrase_unique_AllProteins_14122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSAattempt_17122022 -m prot_t5_xl_uniref50
+
 
 
 #Method 2 - MAFFT (JACOB'S CODE)
+
 source activate jacob_env
 mafft --retree 2 --thread 6  ATHILA5_ATHILAORF_Allproteins_and_OUTGROUPS.fa > AthORF_05082022.fasta
 #Example of how to run MAFFT alignment. Important to include the outgroups in the .fasta file!
