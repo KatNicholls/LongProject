@@ -68,3 +68,4 @@ for (i in 1:2) {
   
 }
 
+#NOW TRANSDECODER AND PFAM
