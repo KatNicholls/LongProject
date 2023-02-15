@@ -1,18 +1,18 @@
-#Step 2 AGAIN - creating a fasta files of the TE sequences
-#USING DIFFERENT FAST FILES SO ITS CORRECT
-
-#loading the libraries needed
+# Libraries
 library(seqinr)
 library(Biostrings)
 library(dplyr)
 
 #creating a list of the accession sequences
+setwd("~/katherine/66_genomes_datafiles")
 myfiles=list.files(pattern="*.fa")
-#creating a list of the filtered accession for TEs and removing the Alyrata sequences, so just have the 66 Athaliana sequences
-mycsv=list.files(path="~/katherine/005TEs/003EDTA_Filt/", pattern="*csv")
 
-#removing Alyrata sequences from csv files
-mycsv=mycsv[c(1:56,58,59,60,61,63:67,69)]
+#creating a list of the filtered accession for TEs and removing the Alyrata sequences, so just have the 66 Athaliana sequences
+mycsv=list.files(path="~/katherine/009REPEAT/001TE_Locations/", pattern="*csv")
+
+#removing Alyrata sequences from csv files and fasta files
+mycsv=mycsv[-c(57,62,68)]
+myfiles=myfiles[-c(57,62,68)]
 
 #Found a mismatch between the names of the two files so need to fix it
 #removing all but the names
@@ -25,6 +25,7 @@ myfiles2=gsub("\\.1.primary","",myfiles2)
 
 
 mycsv=gsub("\\.csv", "", mycsv)
+
 #lets try match the order
 #creating mycsv2 to be able to match
 mycsv2=mycsv
@@ -52,14 +53,15 @@ for (i in 1:66) {
   myname=mycsv[i]
   mycsvi=paste(mycsv[i], ".csv", sep="")
   
-  setwd("~/katherine/005TEs/003EDTA_Filt/")
+  setwd("~/katherine/009REPEAT/001TE_Locations/")
   mycsvi <- read.csv(mycsvi)
   
-  setwd("/home/irh25/katherine/004Genomes/004Athaliana_NEW")
   
-  #removing anything that is Chr1 etc... getting rid of ptg -- why didn't it take out the scaffold...
+  #removing anything that is Chr1 etc... getting rid of ptg 
   mychrom=c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5")
   mycsvi=mycsvi[mycsvi$chrm%in%mychrom,]
+  
+  setwd("~/katherine/66_genomes_datafiles")
   
   myfastafile=paste(myfiles[i])
   myfasta <- readDNAStringSet(myfastafile)
@@ -83,12 +85,16 @@ for (i in 1:66) {
     fasta.names[j] = paste(c(Chr,Start,Stop,Length,TE,Accession), collapse="_")
     fasta.seqs[[j]] = subseq(myfasta[[Chrm[j]]], start = Start, end = Stop)
   }
- 
+  
   #sorting out names
   #my.out <- paste(myfiles[i], "_TE_Seq", sep="")
   my.out <- gsub("\\..*","_TE_Seq",myfiles[i])
   
+  
+  setwd("/home/irh25/katherine/009REPEAT/002Fasta")
+  
   write.fasta(sequences = fasta.seqs, names = fasta.names, file.out = my.out, open ="w", nbchar=60, as.string = TRUE)
   
 }
+
 
