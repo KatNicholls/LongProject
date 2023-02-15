@@ -1,0 +1,234 @@
+# ISOLATING ATHILA BY CENTROMERE GROUP ------------------------------------
+## thinking through the steps
+## might need to check but going to start with separating the ATHILA by type - e.g. ATHILA6a
+## Then going to put each one into which centromere its from... e.g. Centromere 1 ATHILA6a
+### Then need to group by Centromere group
+### Cat all these groups together
+### Run vcMSA
+
+library(tidyverse)
+library(Biostrings)
+library(seqinr)
+
+
+# STEP 1 ------------------------------------------------------------------
+#FILES NEEDED:
+TEs <- read_csv("TE_with_flanks_scored.csv", col_names = TRUE)
+ATHILA <- readDNAStringSet("All_ATHILA_Seq_010223.fa")
+
+
+#finding names of ATHILA
+filter_athila_names <- data.frame(str_split_fixed(names(ATHILA), "_", n=7))
+unique(filter_athila_names$X5)
+
+# check names solution could be grepping with _
+#Separating ATHILA by type
+# fasta.file <- c()
+for(i in 1:length(unique(filter_athila_names$X5))){
+  rows <- NA
+  
+  Athila_num <- paste(unique(filter_athila_names$X5)[i],"_", sep="")
+  rows <- filter_athila_names %>% filter(filter_athila_names$X5 == Athila_num)
+  
+  fasta.names <- c()
+  fasta.sequences <- list()
+  
+  for(j in 1:length(ATHILA)){
+    if(grepl(Athila_num, names(ATHILA)[j], fixed = TRUE) == TRUE){
+      fasta.names <- c(fasta.names, names(ATHILA)[j])
+      fasta.sequences <- c(fasta.sequences, subseq(ATHILA[[j]]))
+      #fasta.seqs[[j]] = subseq(ATHILA[[j]], start = 1, end = width(ATHILA)[j])
+    }
+    else{}
+      # fasta.names[j] <- NA
+      # fasta.sequences[[j]] <- NA
+  }
+  # fasta.names <- na.omit(fasta.names)
+  # fasta.sequences <- fasta.sequences[!is.na(fasta.sequences)]
+
+ #write fasta
+my.out <- paste(Athila_num,"Integrase_Athal_120223.fa", sep="")
+write.fasta(sequences = fasta.sequences, names = fasta.names, file.out = my.out, open ="w", nbchar=60, as.string = TRUE)
+}
+
+
+# STEP 2 ------------------------------------------------------------------
+###Separating ATHILA by chromsome...
+#1. list the files
+setwd("/home/irh25/katherine/010Cent_Group/001Integrase_ATHILA_family")
+raw_files <- data.frame(filename=list.files(pattern="Integrase_Athal_120223.fa"))
+raw_files <- raw_files %>% mutate(Athila_name = gsub("_Integrase_Athal_120223.fa","",raw_files[,1]))
+
+#make a list of working directories
+alphabet <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p")
+working_directory <- c()
+for(i in 1:nrow(raw_files)){
+  working_directory[i] <- paste("~/katherine/010Cent_Group/003",alphabet[i],raw_files$Athila_name[i], sep = "")
+}
+raw_files <- raw_files %>% mutate(working_directory = working_directory)
+## due to linux indexing need to fix a couple
+raw_files[,3] <- gsub("003fATHILA4","003gATHILA4", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003gATHILA4a","003fATHILA4a", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003kATHILA6a","003jATHILA6a", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003jATHILA6","003kATHILA6", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003mATHILA7","003nATHILA7", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003nATHILA7a","003mATHILA7a", raw_files[,3], fixed=TRUE)
+
+
+#2. need a loop
+#2a. read in the file
+#2b. split the names
+#2c. filter by unique chromosome
+#2d. write back into a fasta file for each -> put in a different working directory...
+
+setwd("/home/irh25/katherine/010Cent_Group/001Integrase_ATHILA_family")
+for(i in 1:nrow(raw_files)){
+  myfasta <- raw_files[i,1]
+  ATHILA_fa <- readDNAStringSet(myfasta)
+  
+  Centromere <- data.frame(str_split_fixed(names(ATHILA_fa), "_", n=7)) %>% select(X1) %>% unique()
+  
+  ATHILA_Cent_Of_Interest_names <- c()
+  ATHILA_Seq <- list()
+  
+  for(j in 1:nrow(Centromere)){
+    ATHILA_Cent_Of_Interest_names <- c()
+    ATHILA_Seq <- list()
+    for(k in 1:length(ATHILA_fa)){
+      if(grepl(Centromere[j,1], names(ATHILA_fa)[k], fixed=TRUE) == TRUE){
+        ATHILA_Cent_Of_Interest_names <- c(ATHILA_Cent_Of_Interest_names, names(ATHILA_fa)[k])
+        ATHILA_Seq <- c(ATHILA_Seq, subseq(ATHILA_fa[[k]]))
+      }
+      else{}
+    }
+    # WRITE FASTA OUT:
+      my.out <- paste(raw_files$Athila_name[i], "_", Centromere[j,1], "_120223.fa", sep="")
+      
+      dir <- raw_files$working_directory[i]
+      setwd(dir)
+      write.fasta(sequences = ATHILA_Seq, names = ATHILA_Cent_Of_Interest_names, file.out = my.out, open ="w", nbchar=60, as.string = TRUE)
+      
+      setwd("/home/irh25/katherine/010Cent_Group/001Integrase_ATHILA_family")
+  }
+}
+
+
+# unique(TEs$)
+# grepl("Centrophilic", Tree$tip.label[i], fixed = TRUE) == TRUE
+# names(ATHILA[i])
+
+# STEP 3 ------------------------------------------------------------------
+# NOW SEPARATING EACH ATHILA TYPE -> CENTROMERE -> CENTROMERE GROUP (THAN FURTHER DIVIDE BY ACCESSION ??)
+# THOUGHTS ON HOW TO DO IT...
+# NEED TO LOOP AROUND THE DIFFERENT DIRECTORIES
+# IN EACH DIRECTORY LIST THE FILES AND LOOP AROUND THEM
+# FOR EACH CENTROMERE MATCH TO THE DIFFERENT GROUPS
+# LOOK INTO THE GROUPS AND HOW THEY VARY
+setwd("/home/irh25/katherine/010Cent_Group/")
+Centromere_group <- read_csv("summary_table_accessions.csv")
+
+#TO LIST THE DIFFERENT ATHILA FAMILIES
+setwd("/home/irh25/katherine/010Cent_Group/001Integrase_ATHILA_family")
+raw_files <- data.frame(filename=list.files(pattern="Integrase_Athal_120223.fa"))
+raw_files <- raw_files %>% mutate(Athila_name = gsub("_Integrase_Athal_120223.fa","",raw_files[,1]))
+
+working_directory <- c()
+alphabet <- c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p")
+for(i in 1:nrow(raw_files)){
+  working_directory[i] <- paste("~/katherine/010Cent_Group/003",alphabet[i],raw_files$Athila_name[i], sep = "")
+}
+raw_files <- raw_files %>% mutate(working_directory = working_directory)
+raw_files[,3] <- gsub("003fATHILA4","003gATHILA4", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003gATHILA4a","003fATHILA4a", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003kATHILA6a","003jATHILA6a", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003jATHILA6","003kATHILA6", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003mATHILA7","003nATHILA7", raw_files[,3], fixed=TRUE)
+raw_files[,3] <- gsub("003nATHILA7a","003mATHILA7a", raw_files[,3], fixed=TRUE)
+
+#Sorting out accession names -- have new column <- my_names
+#create a loop - first for number of ATHILA to go into each directory
+for(i in 1:nrow(raw_files)){
+  dir <- raw_files$working_directory[i]
+  setwd(dir)
+  
+  #second loop -> to list the files in the directory -- CHROMOSOME
+  raw_files2 <- data.frame(filename=list.files(pattern="120223.fa"))
+  
+  for(j in 1:nrow(raw_files2)){
+    #READ IN THE FILES
+    FILE <- readDNAStringSet(raw_files2[j,])
+    
+    #SPLIT THE NAMES UP
+    file_names <- data.frame(str_split_fixed(names(FILE), "_", n=8))
+    
+    centrophilic <- file_names %>% filter(X6 == "Centrophilic" | X7 == "Centrophilic")
+    
+    if((nrow(centrophilic) ==0) == FALSE){
+      #GET THE CENTROPHILIC
+    centrophilic_names <- c()
+    centrophilic_sequences <- list()
+    for(k in 1:length(FILE)){
+      if(grepl("Centrophilic", names(FILE)[k], fixed = TRUE) == TRUE){
+        centrophilic_names <- c(centrophilic_names,names(FILE)[k])
+        centrophilic_sequences <- c(centrophilic_sequences, FILE[[k]])
+      }
+      else{}
+    }
+   
+     #Change the names to match properly
+   centrophilic_names <- gsub(".p1","", centrophilic_names)
+   centrophilic_names <- gsub(".p2","", centrophilic_names)
+   centrophilic_names <- gsub(".p3","", centrophilic_names)
+   centrophilic_names <- gsub(".p4","", centrophilic_names)
+
+    for(k in 1:length(centrophilic_names)){
+      centrophilic_names[k] <- paste(centrophilic_names[k],"_",sep="")
+    }
+    centrophilic_names <- gsub("Ler-0_110x","Ler-0-110x",fixed=TRUE,centrophilic_names)
+      #Match the centromere that your looking at
+    if(grepl("Chr1", names(FILE)[k], fixed = TRUE) == TRUE){
+      Cent_group_useful <- Centromere_group %>% select(my_name, CEN1)
+    } else if(grepl("Chr2", names(FILE)[k], fixed = TRUE) == TRUE){
+      Cent_group_useful <- Centromere_group %>% select(my_name, CEN2)
+    } else if(grepl("Chr3", names(FILE)[k], fixed = TRUE) == TRUE){
+      Cent_group_useful <- Centromere_group %>% select(my_name, CEN3)
+    } else if(grepl("Chr4", names(FILE)[k], fixed = TRUE) == TRUE){
+      Cent_group_useful <- Centromere_group %>% select(my_name, CEN4)
+    } else if(grepl("Chr5", names(FILE)[k], fixed = TRUE) == TRUE){
+      Cent_group_useful <- Centromere_group %>% select(my_name, CEN5)
+    } else{}
+    
+    ### issue with BANI-C-1 and BANI-C-12
+    my_name2 <- c()
+    for(l in 1:nrow(Cent_group_useful)){
+      my_name2[l] <- paste("_", Cent_group_useful$my_name[l],"_", sep="")
+    }
+    
+     my_name2 <- gsub("Ler-0_110x","Ler-0-110x",fixed=TRUE, my_name2)
+    Cent_group_useful <- Cent_group_useful %>% mutate(my_name2 = my_name2)
+    
+    # MATCH THE ACCESSIONS TO THEN MATCH GROUP... ALL THIS SHOULD COME FROM summary table accessions.
+    #remove NAs 
+    Cent_group_useful <- na.omit(Cent_group_useful)
+    
+    for(m in 1:length(centrophilic_names)){
+      for(n in 1:nrow(Cent_group_useful)){
+        if(grepl(Cent_group_useful$my_name2[n],centrophilic_names[m],fixed = TRUE)==TRUE){
+          centrophilic_names[m] <- paste(centrophilic_names[m], "CG", Cent_group_useful[n,2], "_", sep="")
+        } else{}
+      }
+      if(grepl("CG", centrophilic_names[m], fixed=TRUE)==FALSE){
+        centrophilic_names[m] <- paste(centrophilic_names[m], "CGNoMatch", sep="")
+      }
+    }
+
+    ##split the names
+    attempt <- data.frame(str_split_fixed(centrophilic_names, "_", n=8))
+    setwd("~/katherine/010Cent_Group/004Hap_Labelled")
+    my.out = paste("Haplotype_labelled_Integrase_",attempt$X1[1],"_",attempt$X5[1],"_120223.fa",sep="")
+    write.fasta(sequences = centrophilic_sequences, names = centrophilic_names, file.out = my.out, open ="w", nbchar=60, as.string = TRUE)
+    setwd(dir)
+  } else{}
+ }
+  setwd("/home/irh25/katherine/010Cent_Group/001Integrase_ATHILA_family")
+}
