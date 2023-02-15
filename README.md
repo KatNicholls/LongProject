@@ -26,5 +26,18 @@ Step 8:
 Making sure only have unique integrase sequences
 
 Step 9:
-Alignment
+Get Huck Outgroup
+
+Step 10:
+Alyrata and Brassica get Integrases
+
+Step 11:
+Protein Alignment (MAFFT)
+
+Step 12:
+Tree creation (Fast Tree)
+
+Step 13:
+Colouring groups in the trees
+
 
