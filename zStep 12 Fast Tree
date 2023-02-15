@@ -1,0 +1,4 @@
+# 012 Create Trees --------------------------------------------------------
+#FastTree
+#!/bin/bash
+FastTree [in] > [out]
