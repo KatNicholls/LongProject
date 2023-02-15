@@ -1,0 +1,7 @@
+# 011 Protein Alignment ---------------------------------------------------
+
+# MAFFT
+# Make sure have outgroup
+
+#!/bin/bash
+mafft -retree 2 -thread 20 [file] > [out file()]
