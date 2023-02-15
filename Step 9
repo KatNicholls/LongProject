@@ -1,27 +1,31 @@
-#Step 9 - Alignment
 
-#Method 1 - vcMSA
+# 009 Get Outgroup --------------------------------------------------------
+#Run pFam on Huck_element.transdecoder.pep from Jacob
 
-#Download HuggingFace First
+# THEN NEED TO FILTER THE INTEGRASE CORE DOMAIN
+#For retrieving only Integrase Pfam
+Huck_pFam<- read.table(file="Huck_240123.stdout", header=F, fill=T)
 
-#Line of vcMSA code
-vcmsa -i Int_some_17122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSAattempt_17122022 -m prot_t5_xl_uniref50
-
-Save in RunvcMSA.sh
-
-#!/bin/bash -login
-source activate jacob_env
-
-out=/home/irh25/katherine/004Genomes/003Athaliana_TE_Seq
-cd $out
-
-vcmsa -i Integrase_unique_AllProteins_14122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSAattempt_18122022 -m prot_t5_xl_uniref50
-
-vcmsa -i Integrase_unique_Alyrata_19122022.fa -o ~/katherine/004Genomes/003Athaliana_TE_Seq/vcMSA_Aly_21.12.22 -m prot_t5_xl_uniref50
+AllPeptides = read.fasta("Huck_element.transdecoder.pep", seqtype="AA")
 
 
-#Method 2 - MAFFT (JACOB'S CODE)
+#Modify table concatenating names
+Huck_pFam$Joined = paste(Huck_pFam$V19, Huck_pFam$V20, Huck_pFam$V21, Huck_pFam$V22, Huck_pFam$V23)
+Huck_pFam$V19 = NULL
+Huck_pFam$V20 = NULL
+Huck_pFam$V21 = NULL
+Huck_pFam$V22 = NULL
+Huck_pFam$V23 = NULL
+write.table(Huck_pFam, file= "Huck_pFam_TableA") 
 
-source activate jacob_env
-mafft --retree 2 --thread 6 Integrase_unique_Alyrata_19122022.fa > Mafft_Alyrata_21.12.22.fa
-#Example of how to run MAFFT alignment. Important to include the outgroups in the .fasta file!
+#For retrieving only Integrase Pfam
+Integrase_Huck_Pfam = Huck_pFam[Huck_pFam$Joined == "Integrase core domain  ", ]
+
+#making the correct names
+row.names(Integrase_Huck_Pfam) = 1:nrow(Integrase_Huck_Pfam)
+
+names_Integrase = as.character(Integrase_Huck_Pfam$V3)
+Integrase_proteins = AllPeptides[names_Integrase]
+Integrase_proteins = unique(Integrase_proteins)
+
+write.fasta(getSequence(Integrase_proteins), getName(Integrase_proteins), file.out="Huck_Integrase_240123.fa")
