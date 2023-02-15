@@ -9,6 +9,9 @@ Creating a fasta file of the TE sequences (using locations identified above)
 Step 3:
 Adding in the ATHILA sequences 
 
+Extra Step3b: 
+Isolating ATHILA by Centromere Group
+
 Step 4:
 Combining all the sequences together
 
@@ -38,5 +41,7 @@ Tree creation (Fast Tree)
 
 Step 13:
 Colouring groups in the trees
+
+
 
 
