@@ -1,6 +1,5 @@
 # LongProject
 
-A. THALIANA
 Step 1:
 Getting locations of the TEs from EDTA  (have TEs in Athaliana)
 
