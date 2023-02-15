@@ -1,0 +1,193 @@
+# 013 Colour/Label Trees ------------------------------------------------------
+# A THALIANA
+
+# Centrophilic vs Centrophobic --------------------------------------------
+# See if cluster Centrophilic vs Centrophibic
+Centro <- NA
+for(i in 1:length(Tree$tip.label)){
+  if(grepl("Centrophilic", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#ff6961"
+  }
+  else if(grepl("Centrophobic", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#08cad1"
+  }
+  else if(grepl("Copia", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#c780e8"
+  }
+  else if(grepl("Gypsy", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#ffb480"
+  }
+  else if(grepl("LTR_retrotransposon", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#FFD833"
+  }
+  else if(grepl("Huck", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "black"
+  }
+}
+ggtree(Tree)+
+  geom_tippoint(colour = Centro, show.legend = TRUE)
+
+# ATHILA FAMILY -----------------------------------------------------------
+# See if cluster by ATHILA family
+library(RColorBrewer)
+
+athila <- NA
+# split_names <- data.frame(str_split_fixed(Tree$tip.label, "_", n=7))
+# athila_families <- unique(split_names$X5) %>% grep("ATHILA", ., value=TRUE)
+ATHILA_FAMILY <- c("ATHILA", "ATHILA0", "ATHILA1", "ATHILA2",
+                   "ATHILA3", "ATHILA4", "ATHILA4a", "ATHILA4c",
+                   "ATHILA5", "ATHILA6", "ATHILA6a", "ATHILA6b",
+                   "ATHILA7", "ATHILA7a", "ATHILA8a", "ATHILA9", "Huck")
+Colour <- RColorBrewer::brewer.pal(9,'Set1')
+Colour <- colorRampPalette(Colour)(17)
+Colour[17] <- "black"
+athila_colours <- data.frame(Athila = ATHILA_FAMILY, colour = Colour)
+  
+for(i in 1:nrow(athila_colours)){
+  for(j in 1:length(Tree$tip.label)){
+    if(grepl(athila_colours[i,1], Tree$tip.label[j], fixed = TRUE) == TRUE){
+      athila[j] <- athila_colours[i,2]
+    }
+  }
+}
+
+ggtree(Tree) +
+  geom_tippoint(colour = athila, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+ggtree(Tree, layout = "circular")+
+  geom_tippoint(colour = athila, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+# CHROMOSOME --------------------------------------------------------------
+# see if cluster by Chromosome
+#A.THALIANA =  5 CHROMOSOMES
+chromosome <- NA
+for(i in 1:length(Tree$tip.label)){
+  if(grepl("Chr1", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#ff6961"
+  }
+  else if(grepl("Chr2", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#08cad1"
+  }
+  else if(grepl("Chr3", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#c780e8"
+  }
+  else if(grepl("Chr4", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#ffb480"
+  }
+  else if(grepl("Chr5", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "#FFD833"
+  }
+  else if(grepl("Huck", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "black"
+  }
+}
+ggtree(Tree)+
+  geom_tippoint(colour = Centro, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+
+#HAPLOTYPE TREES:
+setwd("~/II/#5 LONG PROJECT/TREES/Haplotype Fast Trees")
+haplotypes <- list.files(pattern=".nex")
+
+Tree1 <- read.tree(haplotypes[1])
+split_names <- data.frame(str_split_fixed(Tree$tip.label, "_", n=8))
+
+Colour <- RColorBrewer::brewer.pal(9,'Set3')
+Colour <- colorRampPalette(Colour)(14)
+Colour[14] <- "black" 
+cent_group <- c("CG1_", "CG2_", "CG3_", "CG4_", "CG5_", "CG6_", "CG7_", "CG8_", "CG9_", "CG10_", 
+                "CG11_","CG12_", "Orphan","Huck")
+Cent_group_name <- gsub("_","", cent_group)
+Cent_colours <- data.frame(CG = cent_group, colour = Colour, name=Cent_group_name)
+
+tip_colours <- NA
+
+par(mfrow=c(1,1))
+
+for(i in 1:length(haplotypes)){
+ Tree <- read.tree(haplotypes[i])
+ split_names <- data.frame(str_split_fixed(Tree$tip.label, "_", n=8))
+ split_names <- split_names %>% filter(!(X1 == "Huck"))
+ tip_colours <- NA
+ for(j in 1:nrow(Cent_colours)){
+   for(k in 1:length(Tree$tip.label)){
+     if(grepl(Cent_colours[j,1], Tree$tip.label[k], fixed=TRUE) ==TRUE){
+       tip_colours[k] <- Cent_colours[j,2]
+     }
+   }
+ }
+ ggtree(Tree) +
+   geom_tippoint(colour = tip_colours, show.legend = TRUE, size = 3, alpha=0.75)+
+   ggtitle(paste(split_names$X1[1]," ",split_names$X5[1]))
+}
+
+# A LYRATA TREE -----------------------------------------------------------
+
+# A ly by TE --------------------------------------------------------------
+Centro <- NA
+for(i in 1:length(Tree$tip.label)){
+  if(grepl("ATHILA", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "blue"
+  }
+  else if(grepl("Copia", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "red"
+  }
+  else if(grepl("Gypsy", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "purple"
+  }
+  else if(grepl("LTR_retrotransposon", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "yellow"
+  }
+  else if(grepl("Huck", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "black"
+  }
+}
+
+ggtree(Tree)+
+  geom_tippoint(colour = Centro, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+ggtree(Tree, layout = "circular")+
+  geom_tippoint(colour = Centro, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+# A ly by In or Out -------------------------------------------------------
+Centro <- NA
+for(i in 1:length(Tree$tip.label)){
+  if(grepl("Huck", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "black"
+  }
+  else if(grepl("IN", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "red"
+  }
+  else if(grepl("OUT", Tree$tip.label[i], fixed = TRUE) == TRUE){
+    Centro[i] <- "blue"
+  }
+}
+ggtree(Tree)+
+  geom_tippoint(colour = Centro, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+ggtree(Tree, layout = "circular")+
+  geom_tippoint(colour = Centro, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+
+# A ly by chromosome
+colour_tip <- NA
+chromosome <- c("Chr1", "Chr2", "Chr3", "Chr4",
+                   "Chr5", "Chr6", "Chr7", "Chr8", "Huck")
+Colour <- RColorBrewer::brewer.pal(9,'Set3')
+Colour[9] <- "black"
+chromosome_colours <- data.frame(chrom = chromosome, colour = Colour)
+
+for(i in 1:nrow(chromosome_colours)){
+  for(j in 1:length(Tree$tip.label)){
+    if(grepl(chromosome_colours[i,1], Tree$tip.label[j], fixed = TRUE) == TRUE){
+      colour_tip[j] <- chromosome_colours[i,2]
+    }
+  }
+}
+
+ggtree(Tree) +
+  geom_tippoint(colour = colour_tip, show.legend = TRUE, size = 0.8, alpha=0.75)
+
+ggtree(Tree, layout = "circular")+
+  geom_tippoint(colour = colour_tip, show.legend = TRUE, size = 0.8, alpha=0.75)
+
